@@ -1,0 +1,48 @@
+1、web容器在启动的时候，会扫描每个jar包下的 MATE-INF/services/javax.servlet.ServletContainerInitializer
+2、加载这个文件中指定的 SpringServletContainerInitializer
+3、spring的应用一启动会加载感兴趣的 WebApplicationInitializer 接口的下的所有组件
+4、并且为 WebApplicationInitializer 组件创建对象（组件不是接口，不是抽象类）
+    1、AbstractContextLoaderInitializer 创建根容器，createRootApplicationContext()
+    2、AbstractDispatcherServletInitializer
+        创建一个web的IOC容器  createServletApplicationContext()
+        创建了 DispatcherServlet ,createDispatcherServlet()
+        将创建的 DispatcherServlet 添加到 ServletContext 中
+            getServletMappings()
+    3、AbstractAnnotationConfigDispatcherServletInitializer 注解方式配置的 DispatcherServlet 初始化器
+        创建根容器 createRootApplicationContext()
+                 getRootConfigClasses(); 传入一个配置类
+        创建web的ioc容器 createServletApplicationContext()
+                 获取配置类 getServletConfigClasses()
+
+总结
+    以注解方式启动springmvc，继承 AbstractAnnotationConfigDispatcherServletInitializer
+    实现抽象方法指定 DispatcherServlet的配置信息
+
+
+
+
+以前在springmvc.xml文件中加的这些配置:
+<!--将springmvc处理不了的请求交给tomcat,静态资源就可以访问-->
+<mvc:default-servlet-handler/>
+
+<!--springmvc的高级功能开启-->
+<mvc:annotation-driven/>
+
+<!--拦截器-->
+<mvc:interceptors>
+</mvc:interceptors>
+
+<mvc:view-controller path=""/>
+
+现在我们没有配置文件了那就使用注解
+1、//开启springmvc功能，在config类上加除了 @ComponentScan注解外还要加上 @EnableWebMvc
+  @EnableWebMvc
+  相当于 <mvc:annotation-driven/>
+
+2、配置组件(视图解析器、视图映射、静态资源映射、拦截器。。。)
+在config类 implements WebMvcConfigurer，实现相关方法,当然这个接口有很多方法要实现，但是我们不一定关系每个方法，于是我们可以继承他的子类,例如：
+AppConfig extends WebMvcConfigurerAdapter
+
+
+
+
